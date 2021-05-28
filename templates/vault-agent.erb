@@ -1,0 +1,26 @@
+exit_after_auth = false
+
+auto_auth {
+  method "aws" {
+      mount_path = "auth/aws"
+      config = {
+          type = "iam"
+          role = "<%= @role.downcase %>-role-<%= @ec2_tag_environment.downcase %>"
+          header_value = "<%= scope().call_function('lookup', ['profiles::vault_agent::vault_header']) %>"
+      }
+  }
+
+}
+
+cache {
+   use_auto_auth_token = true
+}
+
+listener "tcp" {
+   address = "127.0.0.1:8200"
+   tls_disable = true
+}
+
+vault {
+  address = "<%= scope().call_function('lookup', ['profiles::vault_agent::vault_protocol']) %>://<%= scope().call_function('lookup', ['profiles::vault_agent::vault_server']) %>:<%= scope().call_function('lookup', ['profiles::vault_agent::vault_port']) %>"
+}
